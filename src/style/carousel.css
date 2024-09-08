@@ -1,0 +1,27 @@
+.slick-slide {
+    transition: transform 0.5s ease, filter 0.5s ease;
+  }
+  
+  .slick-slide.slick-center {
+    transform: scale(1.1);
+    filter: blur(0);
+    z-index: 1;
+  }
+  
+  .slick-slide:not(.slick-center) {
+    transform: scale(0.8);
+    filter: blur(5px);
+    z-index: 0;
+  }
+
+  .normal-carousel .slick-slide {
+    transition: transform 0.5s ease; 
+    transform: scale(1); 
+    filter: none; 
+    z-index: 1;
+}
+
+.normal-carousel .slick-slide > div {
+    width: 100%;
+}
+
