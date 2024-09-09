@@ -4,15 +4,21 @@ import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import '../style/carousel.css'
-import { getMovieList } from '../services/MovieService'
+import { useNavigate } from 'react-router-dom';
+import { getMovieListNewest } from '../services/MovieService'
 
 export function CarouselCenter() {
+  const navigate = useNavigate();
   const [moviesData, setMoviesData] = useState([]);
-  
+  const goToDetail = (movie) => {
+    console.log(movie._id)
+    navigate('/movie/detail/'+movie._id)
+  }
+
   useEffect(() => {
     const fetchMovies = async () => {
       try {
-        const movies = await getMovieList();
+        const movies = await getMovieListNewest();
         setMoviesData(movies.data.data);
       } catch (err) {
         console.log(err);
@@ -38,6 +44,7 @@ export function CarouselCenter() {
       <Slider {...settings}>
         {moviesData.map((movie, index) => (
           <div
+          onClick={()=>goToDetail(movie)}
             key={index}
             className="relative flex items-center justify-center rounded-lg shadow-lg h-80 overflow-hidden"
           >

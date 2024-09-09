@@ -15,13 +15,12 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DehazeIcon from "@mui/icons-material/Dehaze";
 import MovieIcon from "@mui/icons-material/Movie";
 import SearchIcon from "@mui/icons-material/Search";
+import AnalyticsIcon from '@mui/icons-material/Analytics';
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useNavigate } from 'react-router-dom';
-import { searchMovie } from '../services/MovieService'; // Adjust this import according to your project structure
-
 export function Navbar() {
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [searchQuery, setSearchQuery] = useState(""); 
   const navigate = useNavigate();
   
   const genres = [
@@ -40,7 +39,15 @@ export function Navbar() {
 
   const chooseGenre = (genre) => {
     console.log(genre);
-    navigate(`/movie/list?page=1&limit=3&genre=` + genre);
+    navigate(`/movie/list?page=1&limit=10&genre=` + genre);
+  };
+
+  const newestMovie = () => {
+    navigate(`/movie/sort?page=1&limit=10&input_number=-1`);
+  };
+
+  const oldestMovie = () => {
+    navigate(`/movie/sort?page=1&limit=10&input_number=1`);
   };
 
   const handleSearchInputChange = (event) => {
@@ -50,13 +57,9 @@ export function Navbar() {
   const handleSearchClick = () => {
     console.log(searchQuery)
     if (searchQuery.trim()) {
-      searchMovie(searchQuery).then(response => {
-        console.log('Search Results:', response.data);
-        // You can navigate to a search results page or display the results here
-      }).catch(error => {
-        console.error('Search Error:', error);
-      });
+      navigate(`/movie/search?page=1&limit=10&input=` + searchQuery);
     }
+    setSearchQuery("")
   };
 
   const DrawerList = (
@@ -76,6 +79,40 @@ export function Navbar() {
           </ListItemButton>
         </ListItem>
         <Divider sx={{ borderColor: "white" }} />
+        <ListSubheader
+          sx={{
+            backgroundColor: "#e5b41a",
+            color: "white",
+            fontSize: "18px",
+          }}
+        >
+          <IconButton aria-label="movies">
+            <AnalyticsIcon sx={{ color: "white" }} />
+          </IconButton>
+          Release years
+        </ListSubheader>
+          <ListItem
+           onClick={() => newestMovie()}
+            sx={{ backgroundColor: "#17191b" }}
+            disablePadding
+          >
+            <ListItemButton sx={{ "&:hover": { backgroundColor: "#3e3e3e" } }}>
+              <ListItemText className="text-white" >Newest movie</ListItemText>
+            </ListItemButton>
+          </ListItem>
+
+          <ListItem
+           onClick={() => oldestMovie()}
+            sx={{ backgroundColor: "#17191b" }}
+            disablePadding
+          >
+            <ListItemButton sx={{ "&:hover": { backgroundColor: "#3e3e3e" } }}>
+              <ListItemText className="text-white" >Oldest movie</ListItemText>
+            </ListItemButton>
+          </ListItem>
+
+
+
         <ListSubheader
           sx={{
             backgroundColor: "#e5b41a",
@@ -142,11 +179,11 @@ export function Navbar() {
               placeholder="Search..."
               className="px-3 py-1.5 bg-black text-white border-none rounded-l focus:outline-none"
               value={searchQuery}
-              onChange={handleSearchInputChange} // Handle input change
+              onChange={handleSearchInputChange}
             />
             <div
               className="px-3 py-1.5 bg-gray-700 rounded-r"
-              onClick={handleSearchClick} // Trigger search on click
+              onClick={handleSearchClick}
               style={{ cursor: "pointer" }}
             >
               <SearchIcon

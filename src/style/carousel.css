@@ -24,4 +24,7 @@
 .normal-carousel .slick-slide > div {
     width: 100%;
 }
+.normal-carousel-wrapper {
+  padding-left: 20px;
+}
 

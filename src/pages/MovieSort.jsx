@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { getMoviePagination } from '../services/MovieService';
+import { sortMovie } from '../services/MovieService';
 import { MovieCard } from "../components/Card";
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
-export function MovieSelectPage() {
+export function MovieSortPage() {
     const [moviesData, setMoviesData] = useState([]);
     const [totalPages, setTotalPages] = useState(0);
     const navigate = useNavigate();
@@ -12,16 +12,17 @@ export function MovieSelectPage() {
     const searchParams = new URLSearchParams(location.search);
     const page = parseInt(searchParams.get('page'), 10) || 1;
     const limit = parseInt(searchParams.get('limit'), 10) || 10;
-    const genre = searchParams.get('genre') || '';
+    const input_number = searchParams.get('input_number') || '1';
 
     const handlePageChange = (newPage) => {
-        navigate(`/movie/list?page=${newPage}&limit=${limit}&genre=${encodeURIComponent(genre)}`);
+        navigate(`/movie/sort?page=${newPage}&limit=${limit}&input_number=${encodeURIComponent(input_number)}`);
     };
 
     useEffect(() => {
         const fetchMoviesSelect = async () => {
             try {
-                const response = await getMoviePagination(page, limit, genre);
+                const response = await sortMovie(page, limit, input_number);
+                console.log(response.data.data[0]);
                 if (response.data && response.data.data && response.data.data[0] && response.data.data[0].metaData) {
                     setMoviesData(response.data.data[0].data);
                     setTotalPages(response.data.data[0].metaData[0].totalPages);
@@ -33,13 +34,17 @@ export function MovieSelectPage() {
                 console.error('Error fetching movies:', error);
             }
         };
-    
+
         fetchMoviesSelect();
-    }, [page, limit, genre]);
+    }, [page, limit, input_number]);
+
+    const heading = input_number === '-1'
+    ? 'Arrange from the newest movies'
+    : 'Arrange from the oldest movies';
 
     return (
         <div className="p-8">
-            <h1 className="font-bold text-2xl px-6 pt-6 text-white">{genre}</h1>
+            <h1 className="font-bold text-2xl px-6 pt-6 text-white">{heading}</h1>
             <div className="grid grid-cols-1 xs:grid-cols-2 sml:grid-cols-2 sm:grid-cols-2 mds:grid-cols-3 mdl:grid-cols-4 md:grid-cols-4 lgs:grid-cols-4 lgl:grid-cols-5 lg:grid-cols-5 gap-4 px-6 py-7">
                 {moviesData.length > 0 ? (
                     moviesData.map((movie, index) => (
@@ -70,4 +75,4 @@ export function MovieSelectPage() {
     );
 }
 
-export default MovieSelectPage;
+export default MovieSortPage;
