@@ -1,20 +1,33 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getMovieById } from "../services/MovieService";
+import { addFavoriteMovie, removeFavoriteMovie, checkFavorite } from "../services/UserService";
 import CarouselCardOth from "../components/CarouselCardOth";
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
+import Button from '@mui/material/Button';
+import Snackbar from '@mui/material/Snackbar';
+import Alert from '@mui/material/Alert';
+import { useNavigate } from 'react-router-dom';
 
 export function MovieDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [moviesData, setMoviesData] = useState(null);
-
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
   useEffect(() => {
     const fetchMoviesDetail = async () => {
       try {
         const response = await getMovieById(id);
         setMoviesData(response.data.data);
         console.log(response.data.data);
+
+        const user = localStorage.getItem('user');
+        const parsedUser = JSON.parse(user);
+        const favoriteResponse = await checkFavorite(parsedUser, id);
+        console.log(favoriteResponse.data.isFavorite)
+        setIsFavorite(favoriteResponse.data.isFavorite);
       } catch (err) {
         console.error(err);
       }
@@ -22,6 +35,39 @@ export function MovieDetailPage() {
 
     fetchMoviesDetail();
   }, [id]);
+
+  const handleAddFavorite = async () => {
+    try {
+      const user = localStorage.getItem('user');
+      const parsedUser = JSON.parse(user);
+      if (!parsedUser) {
+        navigate(`/user/login-register`);
+      } else {
+        await addFavoriteMovie(parsedUser, moviesData._id);
+        setOpenSnackbar(true);
+        setIsFavorite(true)
+      }
+
+    } catch (error) {
+      console.error('Failed to add movie to favorites:', error);
+    }
+  };
+
+  const handleRemoveFavorite = async () => {
+    try {
+      const user = localStorage.getItem('user');
+      const parsedUser = JSON.parse(user);
+
+      await removeFavoriteMovie(parsedUser, moviesData._id);
+      setIsFavorite(false);
+    } catch (error) {
+      console.error('Failed to remove movie from favorites:', error);
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  };
 
   return (
     <div className="p-5 bg-black-900 min-h-screen text-white">
@@ -35,7 +81,7 @@ export function MovieDetailPage() {
                 className="w-full h-auto object-cover rounded-lg shadow-md"
               />
             </div>
-            
+
             <div className="md:w-1/2">
               <h1 className="text-4xl font-bold mb-4 text-yellow-400">
                 {moviesData.movie_name}
@@ -62,6 +108,18 @@ export function MovieDetailPage() {
                   ))}
                 </Box>
               </div>
+
+              <div className="mt-6">
+                {isFavorite ? (
+                  <Button variant="contained" color="secondary" onClick={handleRemoveFavorite}>
+                    Remove from Favorites
+                  </Button>
+                ) : (
+                  <Button variant="contained" color="primary" onClick={handleAddFavorite}>
+                    Add to Favorites
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
           <div className="mt-10">
@@ -74,6 +132,16 @@ export function MovieDetailPage() {
       ) : (
         <p className="text-center text-gray-400">No movie data available</p>
       )}
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          Movie added to favorites!
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

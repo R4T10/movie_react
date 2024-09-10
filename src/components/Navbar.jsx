@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Drawer,
@@ -10,6 +10,7 @@ import {
   Divider,
   ListSubheader,
   IconButton,
+  Tooltip
 } from "@mui/material";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import DehazeIcon from "@mui/icons-material/Dehaze";
@@ -17,12 +18,17 @@ import MovieIcon from "@mui/icons-material/Movie";
 import SearchIcon from "@mui/icons-material/Search";
 import AnalyticsIcon from '@mui/icons-material/Analytics';
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import LogoutIcon from '@mui/icons-material/Logout';
 import { useNavigate } from 'react-router-dom';
 export function Navbar() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [open, setOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); 
+  const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
-  
+  const [currentUser, setCurrentUser] = useState("");
+
+
+
   const genres = [
     "Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller",
     "Fantasy", "Cartoon", "Adventure", "Mystery", "Musical", "Crime",
@@ -50,6 +56,19 @@ export function Navbar() {
     navigate(`/movie/sort?page=1&limit=10&input_number=1`);
   };
 
+  const login_register = () => {
+    navigate(`/user/login-register`);
+  };
+
+  const goToFavorite = () => {
+    const user = localStorage.getItem('user');
+    if (user) {
+        navigate(`/movie/favorite`);
+    } else {
+        navigate(`/user/login-register`);
+    }
+};
+
   const handleSearchInputChange = (event) => {
     setSearchQuery(event.target.value);
   };
@@ -62,6 +81,25 @@ export function Navbar() {
     setSearchQuery("")
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    navigate(`/`);
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    const user = localStorage.getItem('user');
+    if (user) {
+      const parsedUser = JSON.parse(user);
+      console.log(parsedUser)
+      setCurrentUser(parsedUser);
+      setIsLoggedIn(true);
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
   const DrawerList = (
     <Box
       sx={{ width: 250, backgroundColor: "#17191b", height: "100%" }}
@@ -71,7 +109,7 @@ export function Navbar() {
     >
       <List className="bg-black">
         <ListItem className="bg-black" disablePadding>
-          <ListItemButton sx={{ "&:hover": { backgroundColor: "#3e3e3e" } }}>
+          <ListItemButton onClick={()=>goToFavorite()} sx={{ "&:hover": { backgroundColor: "#3e3e3e" } }}>
             <IconButton aria-label="add to favorites">
               <AddCircleOutlineIcon sx={{ color: "#e5b41a" }} />
             </IconButton>
@@ -91,25 +129,25 @@ export function Navbar() {
           </IconButton>
           Release years
         </ListSubheader>
-          <ListItem
-           onClick={() => newestMovie()}
-            sx={{ backgroundColor: "#17191b" }}
-            disablePadding
-          >
-            <ListItemButton sx={{ "&:hover": { backgroundColor: "#3e3e3e" } }}>
-              <ListItemText className="text-white" >Newest movie</ListItemText>
-            </ListItemButton>
-          </ListItem>
+        <ListItem
+          onClick={() => newestMovie()}
+          sx={{ backgroundColor: "#17191b" }}
+          disablePadding
+        >
+          <ListItemButton sx={{ "&:hover": { backgroundColor: "#3e3e3e" } }}>
+            <ListItemText className="text-white" >Newest movie</ListItemText>
+          </ListItemButton>
+        </ListItem>
 
-          <ListItem
-           onClick={() => oldestMovie()}
-            sx={{ backgroundColor: "#17191b" }}
-            disablePadding
-          >
-            <ListItemButton sx={{ "&:hover": { backgroundColor: "#3e3e3e" } }}>
-              <ListItemText className="text-white" >Oldest movie</ListItemText>
-            </ListItemButton>
-          </ListItem>
+        <ListItem
+          onClick={() => oldestMovie()}
+          sx={{ backgroundColor: "#17191b" }}
+          disablePadding
+        >
+          <ListItemButton sx={{ "&:hover": { backgroundColor: "#3e3e3e" } }}>
+            <ListItemText className="text-white" >Oldest movie</ListItemText>
+          </ListItemButton>
+        </ListItem>
 
 
 
@@ -191,9 +229,44 @@ export function Navbar() {
               />
             </div>
           </div>
-          <IconButton aria-label="profile">
-            <AccountCircleIcon sx={{ color: "white" }} />
-          </IconButton>
+          {isLoggedIn ? (
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+
+                <AccountCircleIcon sx={{ fontSize: 25, color: "white" }} />
+
+                <span className="text-white text-lg font-medium ml-2">{currentUser}</span>
+              </div>
+              <Tooltip title="Logout" arrow>
+                <IconButton
+                  aria-label="logout"
+                  onClick={() => handleLogout()}
+                  sx={{
+                    color: "white",
+                    transition: "transform 0.2s ease, background-color 0.2s ease",
+                    '&:hover': {
+                      backgroundColor: "#555",
+                    },
+                    '&:active': {
+                      transform: "scale(0.95)",
+                      backgroundColor: "#333",
+                    }
+                  }}
+                >
+                  <LogoutIcon sx={{ fontSize: 25 }} />
+                </IconButton>
+              </Tooltip>
+
+            </div>
+          ) : (
+            <Button
+              className="bg-white text-black"
+              onClick={() => login_register()}
+              sx={{backgroundColor:'#e5b41a',color:'black'}}
+            >
+              Sigin
+            </Button>
+          )}
         </div>
       </div>
     </nav>

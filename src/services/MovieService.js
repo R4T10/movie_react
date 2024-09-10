@@ -26,3 +26,7 @@ export const getMovieListNewest = () => {
   export const sortMovie = (page,limit,sort) =>{
     return apiClient.get('movies/api/v1/movie/sorted_movies?page='+page+'&limit='+limit+'&input_number='+sort)
   }
+
+
+
+  

@@ -6,7 +6,9 @@ import HomePage from "./pages/Homepage";
 import MovieDetailPage from "./pages/MovieDetail";
 import MovieSelectPage from "./pages/MovieSelect";
 import MovieSearchPage from "./pages/MovieSearch";
+import LoginRegisPage from "./pages/LoginRegis";
 import MovieSortPage from "./pages/MovieSort";
+import FavoritePage from "./pages/Favoritepage";
 function App() {
   return (
     <div>
@@ -19,6 +21,8 @@ function App() {
             <Route path="/movie/list" element={<MovieSelectPage />} />
             <Route path="/movie/search" element={<MovieSearchPage />} />
             <Route path="/movie/sort" element={<MovieSortPage />} />
+            <Route path="/user/login-register" element={<LoginRegisPage />} />
+            <Route path="/movie/favorite" element={<FavoritePage />} />
           </Routes>
         </div>
       </Router>

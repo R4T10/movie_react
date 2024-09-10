@@ -1,23 +1,48 @@
-import React from 'react';
-import { Card, CardMedia, CardContent, Typography, Chip, Box, IconButton } from '@mui/material';
+import React, { useState } from 'react';
+import { Card, CardMedia, CardContent, Typography, Chip, Box, IconButton, Snackbar, Alert } from '@mui/material';
 import BookmarkIcon from '@mui/icons-material/Bookmark';
 import { useNavigate } from 'react-router-dom';
-export function MovieCard({ movie}) {
+import { addFavoriteMovie } from '../services/UserService';
+
+export function MovieCard({ movie }) {
   const navigate = useNavigate();
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
   const checkCard = (movie) => {
-    console.log(movie._id)
-    navigate('/movie/detail/'+movie._id)
+    console.log(movie._id);
+    navigate('/movie/detail/' + movie._id);
   }
+
+  const handleAddFavorite = async (event) => {
+    event.stopPropagation();
+    try {
+      const user = localStorage.getItem('user');
+      const parsedUser = JSON.parse(user);
+      if (!parsedUser) {
+        navigate(`/user/login-register`);
+      } else {
+        await addFavoriteMovie(parsedUser, movie._id);
+        console.log('Movie added to favorites');
+        setOpenSnackbar(true);
+      }
+    } catch (error) {
+      console.error('Failed to add movie to favorites:', error);
+    }
+  }
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
+  }
+
   return (
     <Box
-      onClick={()=>checkCard(movie)}
+      onClick={() => checkCard(movie)}
       sx={{
         maxWidth: 345,
         borderRadius: 2,
         boxShadow: 3,
         position: 'relative',
-        cursor: 'pointer', 
+        cursor: 'pointer',
       }}
     >
       <Card>
@@ -42,6 +67,7 @@ export function MovieCard({ movie}) {
           <IconButton
             aria-label="add to favorites"
             sx={{ backgroundColor: 'black' }}
+            onClick={handleAddFavorite}
           >
             <BookmarkIcon sx={{ color: '#e5b41a' }} />
           </IconButton>
@@ -64,6 +90,16 @@ export function MovieCard({ movie}) {
           </Typography>
         </CardContent>
       </Card>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          Movie added to favorites!
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }
